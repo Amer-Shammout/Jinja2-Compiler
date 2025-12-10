@@ -28,3 +28,19 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# === ANTLR Generated Files ===
+src/antlr/*.tokens
+src/antlr/*.interp
+src/antlr/*.java
+src/antlr/*.class
+gen/
+src/antlr/gen/
+
+# Java build files
+*.class
+*.jar
+*.log
+
+# Keep grammar files only
+!src/antlr/*.g4
