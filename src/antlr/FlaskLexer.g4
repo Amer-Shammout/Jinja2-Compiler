@@ -148,9 +148,14 @@ IDENTIFIER
     : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 //Numbers
-INT: [0-9]+ ;
+INT
+    : '0'
+    | [1-9] [0-9]*
+    ;
 FLOAT: [0-9]+ '.' [0-9]+ ;
-SCIENTIFIC: [0-9]+ ('.' [0-9]+)? [eE] [+-]? [0-9]+ ;
+SCIENTIFIC
+    : INT ('.' [0-9]+)? [eE] [+-]? [0-9]+
+    ;
 
 //Strings
 TRIPLE_STRING
@@ -212,10 +217,3 @@ COMMENT
 WS
     : [ \t]+ -> skip
     ;
-
-
-
-
-
-
-
