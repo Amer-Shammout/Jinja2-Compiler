@@ -114,14 +114,13 @@ public class FlaskLexer extends Lexer {
 
 	    private java.util.LinkedList<Token> tokens = new java.util.LinkedList<>();
 	    private java.util.Stack<Integer> indents = new java.util.Stack<>();
-	    private int opened = 0; // لحساب الأقواس المفتوحة ()
+	    private int opened = 0;
 	    private Token lastToken = null;
 
 	    @Override
 	    public void emit(Token t) {
 	        super.setToken(t);
 	        tokens.offer(t);
-	        // تحديث آخر توكن حقيقي
 	        if (t.getChannel() == Token.DEFAULT_CHANNEL) {
 	            this.lastToken = t;
 	        }
@@ -131,20 +130,20 @@ public class FlaskLexer extends Lexer {
 	    public Token nextToken() {
 	        // إذا وصلنا EOF وما زالت هناك مستويات DEDENT
 	        if (_input.LA(1) == EOF && !indents.isEmpty()) {
-	            // إزالة أي EOF موجود مسبقاً من الـ queue
+
 	            for (int i = tokens.size() - 1; i >= 0; i--) {
 	                if (tokens.get(i).getType() == EOF) {
 	                    tokens.remove(i);
 	                }
 	            }
 
-	            // توليد DEDENT لكل مستوى
+
 	            while (!indents.isEmpty()) {
 	                this.emit(createDedent());
 	                indents.pop();
 	            }
 
-	            // إعادة EOF
+
 	            this.emit(commonToken(EOF, "<EOF>"));
 	        }
 
@@ -241,7 +240,7 @@ public class FlaskLexer extends Lexer {
 			       String spaces = getText().replaceAll("[\r\n]+", "");
 			       emit(commonToken(NEWLINE, newLine));
 
-			       if (opened == 0) {  // فقط إذا لم نكن داخل أقواس
+			       if (opened == 0) {
 			           int indent = getIndentationCount(spaces);
 			           int previous = indents.isEmpty() ? 0 : indents.peek();
 
@@ -253,6 +252,7 @@ public class FlaskLexer extends Lexer {
 			                   this.emit(createDedent());
 			                   indents.pop();
 			               }
+
 			           }
 			       }
 			   

@@ -1,17 +1,13 @@
-# تعريف دالة مع استخدام كل أنواع الأعداد والمعرفات
 def compute_area(width, height=10, factor=2.5e1):
-    # عملية حسابية مع جميع العمليات
     area = (width + height) * factor // 2 - 5 ** 2
     if area >= 100:
         print("Area is large:", area)
     else:
         print('Area is small:', area)
 
-# استخدام قائمة وقاموس
 my_list = [1, 2, 3, 4]
 my_dict = {"a": 1, "b": 2}
 
-# تعريف صنف مع خصائصه
 class Rectangle:
     def __init__(self, width, height):
         self.width = width
