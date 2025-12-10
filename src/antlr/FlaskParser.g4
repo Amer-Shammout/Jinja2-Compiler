@@ -4,14 +4,12 @@ parser grammar FlaskParser;
 package antlr;
 }
 
-
-
 options {
     tokenVocab = FlaskLexer;
 }
 
 // -----------------------------------------
-// Program
+// PROGRAM
 // -----------------------------------------
 
 prog
@@ -19,21 +17,22 @@ prog
     ;
 
 // -----------------------------------------
-// Statements (order is VERY important)
+// STATEMENTS
 // -----------------------------------------
 
 stmt
-    : assignment NEWLINE            # AssignmentStmt
-    | return_stmt NEWLINE           # ReturnStmt
-    | pass_stmt NEWLINE             # PassStmt
-    | break_stmt NEWLINE            # BreakStmt
-    | continue_stmt NEWLINE         # ContinueStmt
-    | expr NEWLINE                  # ExprStmt
-    | NEWLINE                       # EmptyLine
+    : assignment NEWLINE              # AssignmentStmt
+    | return_stmt NEWLINE             # ReturnStmt
+    | pass_stmt NEWLINE               # PassStmt
+    | break_stmt NEWLINE              # BreakStmt
+    | continue_stmt NEWLINE           # ContinueStmt
+    | expr NEWLINE                    # ExprStmt
+    | compound_stmt                   # CompoundStmt
+    | NEWLINE                         # EmptyLine
     ;
 
 // -----------------------------------------
-// Simple Statements (Level 2)
+// SIMPLE STATEMENTS (Level 2)
 // -----------------------------------------
 
 assignment
@@ -57,27 +56,119 @@ continue_stmt
     ;
 
 // -----------------------------------------
-// Expressions (Level 1)
+// COMPOUND STATEMENTS (Level 3)
 // -----------------------------------------
 
+compound_stmt
+    : if_stmt
+    | while_stmt
+    | for_stmt
+    | func_def
+    | class_def
+    ;
+
+// IF
+if_stmt
+    : IF expr COLON suite
+      (ELIF expr COLON suite)*
+      (ELSE COLON suite)?
+    ;
+
+// WHILE
+while_stmt
+    : WHILE expr COLON suite
+    ;
+
+// FOR
+for_stmt
+    : FOR IDENTIFIER IN expr COLON suite
+    ;
+
+// FUNCTION DEF
+func_def
+    : DEF IDENTIFIER LPAREN parameters? RPAREN COLON suite
+    ;
+
+parameters
+    : IDENTIFIER (COMMA IDENTIFIER)*
+    ;
+
+// CLASS DEF
+class_def
+    : CLASS IDENTIFIER (LPAREN IDENTIFIER RPAREN)? COLON suite
+    ;
+
+// SUITE (BLOCKS)
+suite
+    : NEWLINE INDENT stmt+ DEDENT      # BlockSuite
+    | stmt                              # InlineSuite
+    ;
+
+// -----------------------------------------
+// EXPRESSIONS (Level 1+4)
+// -----------------------------------------
+
+// expr = logical_or
 expr
-    : expr (PLUS | MINUS) term      # AddSub
-    | term                          # ToTerm
+    : logic_or
     ;
 
+// logical OR
+logic_or
+    : logic_or OR logic_and             # OrExpr
+    | logic_and                         # ToAnd
+    ;
+
+// logical AND
+logic_and
+    : logic_and AND logic_not           # AndExpr
+    | logic_not                         # ToNot
+    ;
+
+// unary: NOT
+logic_not
+    : NOT logic_not                     # NotExpr
+    | comparison                        # ToCompare
+    ;
+
+// comparisons
+comparison
+    : arith_expr (comp_op arith_expr)*  # Compare
+    ;
+
+// comparison operators
+comp_op
+    : LT
+    | GT
+    | LE
+    | GE
+    | EQ
+    | NE
+    ;
+
+// Arithmetic +, -
+arith_expr
+    : arith_expr (PLUS | MINUS) term    # AddSub
+    | term                              # ToTerm
+    ;
+
+// *, /
 term
-    : term (STAR | DIV) factor      # MulDiv
-    | factor                        # ToFactor
+    : term (STAR | DIV) factor          # MulDiv
+    | factor                            # ToFactor
     ;
 
+// unary +/-
 factor
-    : atom                          # ToAtom
+    : (PLUS | MINUS) factor             # UnaryPM
+    | atom                              # ToAtom
     ;
 
+// ATOM
 atom
-    : INT                           # IntAtom
-    | FLOAT                         # FloatAtom
-    | SCIENTIFIC                    # SciAtom
-    | IDENTIFIER                    # IdAtom
-    | LPAREN expr RPAREN            # ParenExpr
+    : INT                               # IntAtom
+    | FLOAT                             # FloatAtom
+    | SCIENTIFIC                        # SciAtom
+    | IDENTIFIER                        # IdAtom
+    | LPAREN expr RPAREN                # ParenExpr
     ;
