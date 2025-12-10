@@ -1,0 +1,49 @@
+<!-- Main page comment -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Complex Test Page</title>
+
+
+</head>
+
+<body>
+
+    <h1 class="title">Welcome to the Test Page</h1>
+
+    <p>This is a paragraph with HTML entities &amp; text that includes and symbols.</p>
+
+    <img src="image1.png" alt="Sample image" />
+    <img src="image2.png" alt='Another image' width="300" />
+
+    <a href="https://example.com" target="_blank" class="link">Click here</a>
+
+    <div id="container" style="background:#eee; padding:10px;">
+        <h2>Nested List</h2>
+
+        <ul class="list">
+            <li>Item 1</li>
+            <li>Item 2
+                <ul>
+                    <li>Subitem 1</li>
+                    <li>Subitem 2</li>
+                </ul>
+            </li>
+            <li>Item 3</li>
+        </ul>
+
+        <!-- Another comment -->
+        <p class="note">Note: This is an important message.</p>
+    </div>
+
+    <br />
+
+    <footer>
+        <p>Made with love in 2025</p>
+    </footer>
+
+</body>
+
+</html>

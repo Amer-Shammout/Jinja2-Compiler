@@ -9,6 +9,10 @@ lexer grammar TemplateLexer;
 
 // ---------- DEFAULT MODE: outside tags (text, comments) ----------
 // whitespace outside tags
+DOCTYPE
+    : '<!' 'DOCTYPE' (~'>')* '>'
+    ;
+
 HTML_WS : [ \t\r\n]+ -> skip ;
 
 HTML_COMMENT
