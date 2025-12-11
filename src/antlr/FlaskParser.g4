@@ -126,7 +126,7 @@ expr
     | expr (STAR | DIV) expr                       # MulDivExpr
     | NOT expr                                     # NotExpr
     | (PLUS | MINUS) expr                          # UnaryPMExpr
-    | atom                                         # AtomExpr
+    | primary                                      # PrimaryExpr
     ;
 
 // ======================================================
@@ -138,6 +138,27 @@ atom
     | IDENTIFIER                                   # IdAtom
     | LPAREN expr RPAREN                           # ParenExpr
     ;
+
+
+// ======================================================
+// PRIMARY EXPRESSIONS
+// ======================================================
+
+primary
+    : atom trailer*                         # PrimaryRoot
+    ;
+
+trailer
+    : LPAREN arguments? RPAREN              # CallTrailer
+    | DOT IDENTIFIER                        # AttrTrailer
+    | LBRACK expr RBRACK                    # IndexTrailer
+    ;
+
+arguments
+    : expr (COMMA expr)*                    # ArgList
+    ;
+
+
 
 // ======================================================
 // LITERALS
