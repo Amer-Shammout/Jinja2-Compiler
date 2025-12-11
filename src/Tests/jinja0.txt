@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ page_title }}</title>
+</head>
+
+<body>
+
+<!-- HTML comment -->
+<h1>Welcome, {{ user.name }}</h1>
+
+<p>Account status:
+    {% if user.is_active and not user.is_banned %}
+        Active
+    {% elif user.is_banned %}
+        Banned
+    {% else %}
+        Unknown
+    {% endif %}
+</p>
+
+<div class="products">
+
+    {% for item in products %}
+        <div class="product-card">
+
+            <h2>{{ item.title }}</h2>
+
+            <p>Price:
+                {{ item.price }}
+                {% if item.discount > 0 %}
+                    (Discount: {{ item.discount }}%)
+                {% endif %}
+            </p>
+
+            {% if item.stock > 0 %}
+                <p>In Stock</p>
+            {% else %}
+                <p>Out of Stock</p>
+            {% endif %}
+
+            <p>
+                {% if item.category == "electronics" or item.category == "computers" %}
+                    Tech Product
+                {% else %}
+                    Other Category
+                {% endif %}
+            </p>
+
+        </div>
+    {% endfor %}
+
+</div>
+
+{% block footer %}
+<footer>
+    <p>Copyright {{ year }}</p>
+    <p>Total: {{ products|length }}</p>
+</footer>
+{% endblock %}
+
+{# Jinja comment: should be skipped #}
+
+</body>
+</html>
