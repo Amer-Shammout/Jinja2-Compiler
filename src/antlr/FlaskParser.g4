@@ -8,32 +8,36 @@ options {
     tokenVocab = FlaskLexer;
 }
 
-// -----------------------------------------
+// ======================================================
 // PROGRAM
-// -----------------------------------------
+// ======================================================
 
 prog
     : stmt* EOF
     ;
 
-// -----------------------------------------
+// ======================================================
 // STATEMENTS
-// -----------------------------------------
+// ======================================================
 
 stmt
-    : assignment NEWLINE              # AssignmentStmt
-    | return_stmt NEWLINE             # ReturnStmt
-    | pass_stmt NEWLINE               # PassStmt
-    | break_stmt NEWLINE              # BreakStmt
-    | continue_stmt NEWLINE           # ContinueStmt
-    | expr NEWLINE                    # ExprStmt
-    | compound_stmt                   # CompoundStmt
-    | NEWLINE                         # EmptyLine
+    : simple_stmt NEWLINE              # SimpleStmtLine
+    | compound_stmt                    # CompoundStmt
+    | NEWLINE                          # EmptyLine
     ;
 
-// -----------------------------------------
-// SIMPLE STATEMENTS (Level 2)
-// -----------------------------------------
+// ======================================================
+// SIMPLE STATEMENTS
+// ======================================================
+
+simple_stmt
+    : assignment
+    | return_stmt
+    | pass_stmt
+    | break_stmt
+    | continue_stmt
+    | expr
+    ;
 
 assignment
     : IDENTIFIER ASSIGN expr
@@ -55,36 +59,40 @@ continue_stmt
     : CONTINUE
     ;
 
-// -----------------------------------------
-// COMPOUND STATEMENTS (Level 3)
-// -----------------------------------------
+// ======================================================
+// COMPOUND STATEMENTS
+// ======================================================
 
 compound_stmt
-    : if_stmt
-    | while_stmt
-    | for_stmt
-    | func_def
-    | class_def
+    : if_stmt                          # IfStmt
+    | while_stmt                       # WhileStmt
+    | for_stmt                         # ForStmt
+    | func_def                         # FuncDefStmt
+    | class_def                        # ClassDefStmt
     ;
 
-// IF
+
+
 if_stmt
     : IF expr COLON suite
       (ELIF expr COLON suite)*
       (ELSE COLON suite)?
     ;
 
-// WHILE
+
+
 while_stmt
     : WHILE expr COLON suite
     ;
 
-// FOR
+
+
 for_stmt
     : FOR IDENTIFIER IN expr COLON suite
     ;
 
-// FUNCTION DEF
+
+
 func_def
     : DEF IDENTIFIER LPAREN parameters? RPAREN COLON suite
     ;
@@ -93,82 +101,68 @@ parameters
     : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
-// CLASS DEF
+
+
 class_def
     : CLASS IDENTIFIER (LPAREN IDENTIFIER RPAREN)? COLON suite
     ;
 
-// SUITE (BLOCKS)
+
+
 suite
-    : NEWLINE INDENT stmt+ DEDENT      # BlockSuite
-    | stmt                              # InlineSuite
+    : simple_stmt                     # InlineSuite
+    | NEWLINE INDENT stmt+ DEDENT     # BlockSuite
     ;
 
-// -----------------------------------------
-// EXPRESSIONS (Level 1+4)
-// -----------------------------------------
+// ======================================================
+// EXPRESSIONS
+// ======================================================
 
-// expr = logical_or
 expr
-    : logic_or
+    : expr OR expr                                 # OrExpr
+    | expr AND expr                                # AndExpr
+    | expr (LT | GT | LE | GE | EQ | NE) expr      # CompareExpr
+    | expr (PLUS | MINUS) expr                     # AddSubExpr
+    | expr (STAR | DIV) expr                       # MulDivExpr
+    | NOT expr                                     # NotExpr
+    | (PLUS | MINUS) expr                          # UnaryPMExpr
+    | atom                                         # AtomExpr
     ;
 
-// logical OR
-logic_or
-    : logic_or OR logic_and             # OrExpr
-    | logic_and                         # ToAnd
-    ;
-
-// logical AND
-logic_and
-    : logic_and AND logic_not           # AndExpr
-    | logic_not                         # ToNot
-    ;
-
-// unary: NOT
-logic_not
-    : NOT logic_not                     # NotExpr
-    | comparison                        # ToCompare
-    ;
-
-// comparisons
-comparison
-    : arith_expr (comp_op arith_expr)*  # Compare
-    ;
-
-// comparison operators
-comp_op
-    : LT
-    | GT
-    | LE
-    | GE
-    | EQ
-    | NE
-    ;
-
-// Arithmetic +, -
-arith_expr
-    : arith_expr (PLUS | MINUS) term    # AddSub
-    | term                              # ToTerm
-    ;
-
-// *, /
-term
-    : term (STAR | DIV) factor          # MulDiv
-    | factor                            # ToFactor
-    ;
-
-// unary +/-
-factor
-    : (PLUS | MINUS) factor             # UnaryPM
-    | atom                              # ToAtom
-    ;
-
+// ======================================================
 // ATOM
+// ======================================================
+
 atom
-    : INT                               # IntAtom
-    | FLOAT                             # FloatAtom
-    | SCIENTIFIC                        # SciAtom
-    | IDENTIFIER                        # IdAtom
-    | LPAREN expr RPAREN                # ParenExpr
+    : literal                                      # LiteralAtom
+    | IDENTIFIER                                   # IdAtom
+    | LPAREN expr RPAREN                           # ParenExpr
+    ;
+
+// ======================================================
+// LITERALS
+// ======================================================
+
+literal
+    : number_literal                               # NumberLiteral
+    | string_literal                               # StringLiteral
+    | boolean_literal                              # BooleanLiteral
+    | NONE                                         # NoneLiteral
+    ;
+
+number_literal
+    : INT                                          # IntNumber
+    | FLOAT                                        # FloatNumber
+    | SCIENTIFIC                                   # SciNumber
+    ;
+
+string_literal
+    : TRIPLE_STRING                                # TripleString
+    | SINGLE_STRING                                # SingleString
+    | DOUBLE_STRING                                # DoubleString
+    ;
+
+boolean_literal
+    : TRUE                                         # TrueLiteral
+    | FALSE                                        # FalseLiteral
     ;
