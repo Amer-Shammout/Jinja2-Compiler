@@ -4,6 +4,30 @@ lexer grammar TemplateLexer;
 
 @members {
     boolean isTagName = false;
+    boolean insideStyle = false;
+
+    java.util.LinkedList<Token> pendingTokens = new java.util.LinkedList<>();
+
+        @Override
+        public Token nextToken() {
+            if (!pendingTokens.isEmpty()) {
+                return pendingTokens.poll();
+            }
+            Token next = super.nextToken();
+            return next;
+        }
+
+        Token commonToken(int type, String text) {
+            return _factory.create(
+                new Pair<>(this, _input),
+                type,
+                text,
+                DEFAULT_TOKEN_CHANNEL,
+                -1, -1,
+                getLine(),
+                getCharPositionInLine()
+            );
+        }
 }
 
 
@@ -19,6 +43,7 @@ DOCTYPE
 HTML_COMMENT
     : '<!--' .*? '-->' -> skip
     ;
+
 
 // ---------------- JINJA2 BLOCKS (Default Mode) ----------------
 
@@ -44,7 +69,7 @@ HTML_OPEN_TAG
 
 // TEXT outside tags
 HTML_TEXT
-    : (~('<' | '{'))+ {   // تجاهل كل ما هو ليس < أو {
+    : (~('<' | '{'))+ {
         String t = getText();
         if (t.trim().isEmpty()) skip();
         else setText(t.trim());
@@ -53,13 +78,19 @@ HTML_TEXT
 
 
 
-
 // ---------------- TAG_MODE: inside < ... > ----------------
 mode TAG_MODE;
 
 HTML_CLOSE_TAG
-    : '>' -> popMode
-    ;
+    : '>' {
+          if (insideStyle) {
+              insideStyle = false;
+              pushMode(CSS_MODE);
+          } else {
+              popMode();
+          }
+      } ;
+
 
 // self-closing "/>"
 HTML_SLASH_CLOSE
@@ -73,7 +104,12 @@ HTML_SLASH
 
 // tag name
 HTML_TAG_NAME
-    : {isTagName}? [a-zA-Z][a-zA-Z0-9\-]* { isTagName = false; }
+    : {isTagName}? [a-zA-Z][a-zA-Z0-9\-]* {
+          isTagName = false;
+          if (getText().equalsIgnoreCase("style")) {
+              insideStyle = true;
+          }
+      }
     ;
 
 // attribute name
@@ -111,6 +147,12 @@ JINJA_ID
 // Pipe for filters
 JINJA_EXRR_PIPE : '|';
 
+JINJA_EXPR_LPAREN : '(' ;
+JINJA_EXPR_RPAREN : ')' ;
+JINJA_EXPR_COMMA  : ',' ;
+JINJA_EXPR_COLON  : ':' ;
+
+
 JINJA_EXPR_STRING
     : '"' (~["\r\n])* '"'
     | '\'' (~['\r\n])* '\''
@@ -130,10 +172,7 @@ JINJA_OP
 // whitespace inside jinja expression
 JINJA_EXPR_WS : [ \t\r\n]+ -> skip;
 
-// fallback
-//JINJA_EXPR_TEXT
-//    : ~[}]+
-//    ;
+
 
 // ---------------- JINJA_STMT_MODE ----------------
 mode JINJA_STMT_MODE;
@@ -165,6 +204,12 @@ JINJA_STMT_ID
     : [a-zA-Z_][a-zA-Z0-9_]*
     ;
 
+JINJA_STMT_LPAREN : '(' ;
+JINJA_STMT_RPAREN : ')' ;
+JINJA_STMT_COMMA  : ',' ;
+JINJA_STMT_COLON  : ':' ;
+
+
 // numbers
 JINJA_STMT_NUMBER
     : '0' ('.' [0-9]+)?
@@ -191,3 +236,105 @@ JINJA_STMT_WS : [ \t\r\n]+ -> skip;
 //JINJA_STMT_TEXT
 //    : ~[%]+
 //    ;
+
+// ---------- CSS_MODE ----------
+mode CSS_MODE;
+
+// any whitespace
+CSS_WS : [ \t\r\n]+ -> skip ;
+
+// </style>
+CSS_STYLE_END
+    : '</style>' -> popMode, mode(DEFAULT_MODE)
+    ;
+
+// Comments
+CSS_COMMENT
+    : '/*' .*? '*/' -> skip
+    ;
+
+// Open Block {
+CSS_LBRACE
+    : '{' -> pushMode(CSS_BLOCK_MODE)
+    ;
+
+// Connector
+CSS_COMMA : ',' ;
+
+// combinators
+CSS_GT : '>';
+CSS_PLUS : '+';
+CSS_TILDE : '~';
+
+// selector tokens
+CSS_HASH : '#' ;
+CSS_DOT : '.' ;
+CSS_COLON : ':' ;
+
+
+CSS_IDENT
+    : [a-zA-Z_][a-zA-Z0-9_-]*
+    ;
+
+
+// ---------- CSS_BLOCK_MODE ----------
+mode CSS_BLOCK_MODE;
+
+// End Of Block }
+CSS_RBRACE : '}' -> popMode ;
+
+// property name
+CSS_PROPERTY
+    : [a-zA-Z-]+ ':' {
+         String text = getText();
+         setText(text.substring(0, text.length() - 1));
+         setType(CSS_PROPERTY);
+         pendingTokens.add(commonToken(CSS_COLON2, ":"));
+     }
+    ;
+
+// :
+CSS_COLON2 : ':' ;
+CSS_COMMA2 : ',' ;
+
+
+// ;
+CSS_SEMICOLON : ';' ;
+
+
+// function
+CSS_FUNCTION
+    : [a-zA-Z-]+ '('
+    ;
+
+CSS_RPAREN : ')' ;
+
+fragment CSS_STRING
+    : '"' (~["\r\n])* '"'
+    | '\'' (~['\r\n])* '\''
+    ;
+
+fragment CSS_HASH_COLOR
+    : '#' HEX_DIGIT HEX_DIGIT HEX_DIGIT (HEX_DIGIT HEX_DIGIT HEX_DIGIT)?
+        ;
+
+fragment HEX_DIGIT : [0-9a-fA-F] ;
+
+fragment CSS_NUMBER
+    : [0-9]+ ('.' [0-9]+)? NUMBER_UNIT?
+    ;
+
+fragment NUMBER_UNIT
+    : 'px' |
+    'vw' ;
+
+CSS_VALUE
+    : CSS_STRING
+    | CSS_HASH_COLOR
+    | CSS_NUMBER
+    | [a-zA-Z_][a-zA-Z0-9_-]*
+    ;
+
+
+// spaces
+CSS_BLOCK_WS : [ \t\r\n]+ -> skip ;
