@@ -2,6 +2,7 @@ def foo(x, y=10):
     """Triple
         double quoted
         string"""
+    
     z = x + y * 2 // 3 - 4.5e2
     if z >= 100:
         print("Large number:", z)

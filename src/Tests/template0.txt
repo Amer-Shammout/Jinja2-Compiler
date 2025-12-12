@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default("My Flask App") }}</title>
+
+    <style type="text/css">
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Dynamic background based on Jinja variable */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: {{ bg_color|default("#f8f9fa") }};
+            color: {{ text_color|default("#333") }};
+            line-height: 1.6;
+        }
+
+        /* Conditional class based on Jinja */
+        {% if user.is_authenticated %}
+        .auth-only {
+            display: block;
+        }
+        {% else %}
+        .auth-only {
+            display: none;
+        }
+        {% endif %}
+
+        /* Dynamic class generation with Jinja loop */
+        {% for color in theme.colors %}
+        .btn-{{ color.name }} {
+            background-color: {{ color.value }};
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-{{ color.name }}:hover {
+            background-color: {{ color.dark_value }};
+        }
+        {% endfor %}
+
+        /* Container with Jinja condition */
+        .container {
+            max-width: {% if wide_layout %}1200px{% else %}800px{% endif %};
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header with Jinja variable */
+        .header h1 {
+            color: {{ header_color }};
+            font-size: {{ header_size }}px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Dynamic grid based on items */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat({{ columns|default(3) }}, 1fr);
+            gap: 20px;
+        }
+
+        /* Card styling */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+        }
+
+        /* Alert messages */
+        {% for category, color in alert_colors.items() %}
+        .alert-{{ category }} {
+            background-color: {{ color }};
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            color: white;
+        }
+        {% endfor %}
+
+    </style>
+</head>
+<body>
+    {% if show_header %}
+    <header class="header">
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                {% for item in menu_items %}
+                <li><a href={{ item.url }}>{{ item.title }}</a></li>
+                {% endfor %}
+
+                {% if current_user %}
+                <li class="user-info">Welcome, {{ current_user.name }}</li>
+                <li><a href="/logout">Logout</a></li>
+                {% else %}
+                <li><a href="/login">Login</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <h1>{{ page_title }}</h1>
+
+        {% for message in get_flashed_messages() %}
+        <div class={{ 'alert-' ~ message.category }}>
+            {{ message.text }}
+        </div>
+        {% endfor %}
+    </header>
+    {% endif %}
+
+    <main class="container">
+        {% block content %}
+        <div class="grid">
+            {% for item in items %}
+            <div class="card">
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.description|truncate(100) }}</p>
+
+                {% if item.price %}
+                <p class="price">Price: ${{ "%.2f"|format(item.price) }}</p>
+                {% endif %}
+
+                {% if item.tags %}
+                <div class="tags">
+                    {% for tag in item.tags %}
+                    <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <button class={{ 'btn-' ~ (item.button_color | default('primary')) }}>
+                    {{ item.button_text | default('View Details') }}
+                </button>
+
+            </div>
+            {% else %}
+            <p>No items found.</p>
+            {% endfor %}
+        </div>
+        {% endblock %}
+
+        {% include "partials/footer.html" %}
+    </main>
+
+
+
+    <!-- Additional CSS (inline) -->
+    <style>
+        /* Additional inline styles */
+        .tag {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .price {
+            font-weight: bold;
+            color: {{ price_color|default('#28a745') }};
+            font-size: 18px;
+        }
+
+        /* Dark mode support */
+        {% if dark_mode %}
+        body.dark-mode {
+            background-color: #222;
+            color: #ddd;
+        }
+
+        .card.dark-mode {
+            background-color: #333;
+            border-color: #444;
+        }
+        {% endif %}
+    </style>
+</body>
+</html>
