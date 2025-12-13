@@ -1,4 +1,3 @@
-
 @ns.decorator_with_args(1, 2)
 class MyClass:
      value = 0

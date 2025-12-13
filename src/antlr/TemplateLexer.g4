@@ -324,7 +324,7 @@ CSS_PROPERTY
          String text = getText();
          setText(text.substring(0, text.length() - 1));
          setType(CSS_PROPERTY);
-         pendingTokens.add(commonToken(CSS_COLON2, ":"));
+         pendingTokens.add(commonToken(CSS_COLON_IN_BLOCK, ":"));
      }
     ;
 
