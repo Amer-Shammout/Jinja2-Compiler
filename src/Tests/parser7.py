@@ -28,11 +28,10 @@ def foo(a, b):
 @ns.decorator_with_args(1, 2)
 class MyClass:
     value = 0
-
     def inc(self):
         self.value = self.value + 1
         other.value = self.value
-        a = b = self.value
+        a =b=self.value
 
 def foot(x, y):
     """Triple
@@ -45,4 +44,4 @@ def foot(x, y):
         print('Small number:', z)
 
 class MyClass:
-    pass  # empty class
+    pass

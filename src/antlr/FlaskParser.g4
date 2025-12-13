@@ -209,10 +209,15 @@ literal
     | boolean_literal                       # BooleanLiteral
     | NONE                                  # NoneLiteral
     | set_literal                           # SetLiteral
+    | list_literal                          # listLiteral
     ;
 
 set_literal
     : LBRACE expr COMMA expr (COMMA expr)* COMMA? RBRACE
+    ;
+
+list_literal
+    : LBRACK expr COMMA expr (COMMA expr)* COMMA? RBRACK
     ;
 
 number_literal

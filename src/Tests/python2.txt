@@ -1,12 +1,13 @@
-def compute_area(width, height=10, factor=2.5e1):
-    area = (width + height) * factor // 2 - 5 ** 2
+def compute_area(width, height, factor):
+    area = (width + height) * factor // 2 - 5 * 2
     if area >= 100:
-        print("Area is large:", area)
+        #print("Area is large:", area)
     else:
-        print('Area is small:', area)
+        #print('Area is small:', area)
 
-my_list = [1, 2, 3, 4]
-my_dict = {"a": 1, "b": 2}
+my_list = [1,2,3,4]
+
+my_dict = {1,3,2}
 
 class Rectangle:
     def __init__(self, width, height):
