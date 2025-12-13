@@ -81,6 +81,15 @@ HTML_TEXT
 // ---------------- TAG_MODE: inside < ... > ----------------
 mode TAG_MODE;
 
+JINJA_EXPR_START_IN_TAG
+    : '{{' -> pushMode(JINJA_EXPR_MODE)
+    ;
+
+JINJA_STMT_START_IN_TAG
+    : '{%' -> pushMode(JINJA_STMT_MODE)
+    ;
+
+
 HTML_CLOSE_TAG
     : '>' {
           if (insideStyle) {
@@ -145,7 +154,7 @@ JINJA_ID
     ;
 
 // Pipe for filters
-JINJA_EXRR_PIPE : '|';
+JINJA_EXPR_PIPE : '|';
 
 JINJA_EXPR_LPAREN : '(' ;
 JINJA_EXPR_RPAREN : ')' ;
@@ -166,7 +175,7 @@ JINJA_NUMBER
 
 // operators
 JINJA_OP
-    : '==' | '!=' | '>=' | '<=' | '>' | '<' | '+' | '-' | '*' | '/' | '%'
+    : '==' | '!=' | '>=' | '<=' | '>' | '<' | '+' | '-' | '*' | '/' | '%' | '~'
     ;
 
 // whitespace inside jinja expression
@@ -226,7 +235,7 @@ JINJA_STMT_STRING
 
 // operators
 JINJA_STMT_OP
-    : '==' | '!=' | '>=' | '<=' | '>' | '<' | '+' | '-' | '*' | '/' | '%'
+    : '==' | '!=' | '>=' | '<=' | '>' | '<' | '+' | '-' | '*' | '/' | '%' | '~'
     ;
 
 // whitespace inside jinja stmt
@@ -240,6 +249,15 @@ JINJA_STMT_WS : [ \t\r\n]+ -> skip;
 // ---------- CSS_MODE ----------
 mode CSS_MODE;
 
+JINJA_COMMENT_IN_CSS
+    : '{#' .*? '#}' -> skip;
+
+JINJA_EXPR_START_IN_CSS
+    : '{{' -> pushMode(JINJA_EXPR_MODE);
+
+JINJA_STMT_START_IN_CSS
+    : '{%' -> pushMode(JINJA_STMT_MODE);
+
 // any whitespace
 CSS_WS : [ \t\r\n]+ -> skip ;
 
@@ -248,10 +266,13 @@ CSS_STYLE_END
     : '</style>' -> popMode, mode(DEFAULT_MODE)
     ;
 
+CSS_UNIVERSAL : '*' ;
+
 // Comments
 CSS_COMMENT
     : '/*' .*? '*/' -> skip
     ;
+
 
 // Open Block {
 CSS_LBRACE
@@ -276,9 +297,23 @@ CSS_IDENT
     : [a-zA-Z_][a-zA-Z0-9_-]*
     ;
 
+//CSS_AT_RULE
+//    : '@' [a-zA-Z_-]+
+//    ;
+
+
 
 // ---------- CSS_BLOCK_MODE ----------
 mode CSS_BLOCK_MODE;
+
+JINJA_COMMENT_IN_CSS_BLOCK
+    : '{#' .*? '#}' -> skip;
+
+JINJA_EXPR_START_IN_CSS_BLOCK
+    : '{{' -> pushMode(JINJA_EXPR_MODE);
+
+JINJA_STMT_START_IN_CSS_BLOCK
+    : '{%' -> pushMode(JINJA_STMT_MODE);
 
 // End Of Block }
 CSS_RBRACE : '}' -> popMode ;
@@ -294,8 +329,8 @@ CSS_PROPERTY
     ;
 
 // :
-CSS_COLON2 : ':' ;
-CSS_COMMA2 : ',' ;
+CSS_COLON_IN_BLOCK : ':' ;
+CSS_COMMA_IN_BLCOK : ',' ;
 
 
 // ;
@@ -324,9 +359,10 @@ fragment CSS_NUMBER
     : [0-9]+ ('.' [0-9]+)? NUMBER_UNIT?
     ;
 
-fragment NUMBER_UNIT
+NUMBER_UNIT
     : 'px' |
-    'vw' ;
+    'vw' |
+    'fr';
 
 CSS_VALUE
     : CSS_STRING
@@ -334,6 +370,7 @@ CSS_VALUE
     | CSS_NUMBER
     | [a-zA-Z_][a-zA-Z0-9_-]*
     ;
+
 
 
 // spaces
