@@ -36,11 +36,23 @@ simple_stmt
     | pass_stmt
     | break_stmt
     | continue_stmt
+    | del_stmt
+    | global_stmt
+    | import_stmt
     | expr
     ;
 
+// ------------------------------------------------------
+// ASSIGNMENT (supports chaining on LHS + multiple assignment)
+// ------------------------------------------------------
+
 assignment
-    : IDENTIFIER ASSIGN expr
+    : assign_target (ASSIGN assign_target)* ASSIGN expr
+    ;
+
+// LHS target: identifier + (.name | [expr])*
+assign_target
+    : IDENTIFIER ((DOT IDENTIFIER) | (LBRACK expr RBRACK))*
     ;
 
 return_stmt
@@ -59,6 +71,19 @@ continue_stmt
     : CONTINUE
     ;
 
+del_stmt
+    : DEL expr (COMMA expr)*
+    ;
+
+global_stmt
+    : GLOBAL IDENTIFIER (COMMA IDENTIFIER)*
+    ;
+
+import_stmt
+    : IMPORT dotted_name (COMMA dotted_name)*                # ImportModule
+    | FROM dotted_name IMPORT IDENTIFIER (COMMA IDENTIFIER)* # FromImport
+    ;
+
 // ======================================================
 // COMPOUND STATEMENTS
 // ======================================================
@@ -69,9 +94,10 @@ compound_stmt
     | for_stmt                         # ForStmt
     | func_def                         # FuncDefStmt
     | class_def                        # ClassDefStmt
+    | decorated                        # DecoratedStmt
     ;
 
-
+// ---------------- IF ----------------
 
 if_stmt
     : IF expr COLON suite
@@ -79,19 +105,19 @@ if_stmt
       (ELSE COLON suite)?
     ;
 
-
+// ---------------- WHILE ----------------
 
 while_stmt
     : WHILE expr COLON suite
     ;
 
-
+// ---------------- FOR ----------------
 
 for_stmt
     : FOR IDENTIFIER IN expr COLON suite
     ;
 
-
+// ---------------- FUNCTION DEF ----------------
 
 func_def
     : DEF IDENTIFIER LPAREN parameters? RPAREN COLON suite
@@ -101,17 +127,27 @@ parameters
     : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
-
+// ---------------- CLASS DEF ----------------
 
 class_def
     : CLASS IDENTIFIER (LPAREN IDENTIFIER RPAREN)? COLON suite
     ;
 
+// ---------------- DECORATORS ----------------
 
+decorator
+    : AT primary NEWLINE
+    ;
+
+decorated
+    : decorator+ (func_def | class_def)
+    ;
+
+// ---------------- SUITE ----------------
 
 suite
-    : simple_stmt                     # InlineSuite
-    | NEWLINE INDENT stmt+ DEDENT     # BlockSuite
+    : simple_stmt NEWLINE                       # InlineSuite
+    | NEWLINE INDENT stmt+ DEDENT               # BlockSuite
     ;
 
 // ======================================================
@@ -122,26 +158,21 @@ expr
     : expr OR expr                                 # OrExpr
     | expr AND expr                                # AndExpr
     | expr (LT | GT | LE | GE | EQ | NE) expr      # CompareExpr
+    | expr IS (NOT)? expr                          # IsExpr
     | expr (PLUS | MINUS) expr                     # AddSubExpr
-    | expr (STAR | DIV) expr                       # MulDivExpr
+    | expr (STAR | DIV | INT_DIV) expr             # MulDivExpr
     | NOT expr                                     # NotExpr
     | (PLUS | MINUS) expr                          # UnaryPMExpr
     | primary                                      # PrimaryExpr
+    | LAMBDA lambda_params? COLON expr             # LambdaExpr
+    ;
+
+lambda_params
+    : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
 // ======================================================
-// ATOM
-// ======================================================
-
-atom
-    : literal                                      # LiteralAtom
-    | IDENTIFIER                                   # IdAtom
-    | LPAREN expr RPAREN                           # ParenExpr
-    ;
-
-
-// ======================================================
-// PRIMARY EXPRESSIONS
+// PRIMARY EXPRESSIONS (Calls, Attributes, Indexing)
 // ======================================================
 
 primary
@@ -155,35 +186,56 @@ trailer
     ;
 
 arguments
-    : expr (COMMA expr)*                    # ArgList
+    : expr (COMMA expr)*
     ;
 
+// ======================================================
+// ATOM
+// ======================================================
 
+atom
+    : literal                               # LiteralAtom
+    | IDENTIFIER                            # IdAtom
+    | LPAREN expr RPAREN                    # ParenExpr
+    ;
 
 // ======================================================
-// LITERALS
+// LITERALS (SET ONLY)
 // ======================================================
 
 literal
-    : number_literal                               # NumberLiteral
-    | string_literal                               # StringLiteral
-    | boolean_literal                              # BooleanLiteral
-    | NONE                                         # NoneLiteral
+    : number_literal                        # NumberLiteral
+    | string_literal                        # StringLiteral
+    | boolean_literal                       # BooleanLiteral
+    | NONE                                  # NoneLiteral
+    | set_literal                           # SetLiteral
+    ;
+
+set_literal
+    : LBRACE expr COMMA expr (COMMA expr)* COMMA? RBRACE
     ;
 
 number_literal
-    : INT                                          # IntNumber
-    | FLOAT                                        # FloatNumber
-    | SCIENTIFIC                                   # SciNumber
+    : INT                                   # IntNumber
+    | FLOAT                                 # FloatNumber
+    | SCIENTIFIC                            # SciNumber
     ;
 
 string_literal
-    : TRIPLE_STRING                                # TripleString
-    | SINGLE_STRING                                # SingleString
-    | DOUBLE_STRING                                # DoubleString
+    : TRIPLE_STRING                         # TripleString
+    | SINGLE_STRING                         # SingleString
+    | DOUBLE_STRING                         # DoubleString
     ;
 
 boolean_literal
-    : TRUE                                         # TrueLiteral
-    | FALSE                                        # FalseLiteral
+    : TRUE                                  # TrueLiteral
+    | FALSE                                 # FalseLiteral
+    ;
+
+// ======================================================
+// HELPERS
+// ======================================================
+
+dotted_name
+    : IDENTIFIER (DOT IDENTIFIER)*
     ;
