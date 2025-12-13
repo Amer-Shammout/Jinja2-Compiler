@@ -42,9 +42,6 @@ simple_stmt
     | expr
     ;
 
-// ------------------------------------------------------
-// ASSIGNMENT (supports chaining on LHS + multiple assignment)
-// ------------------------------------------------------
 
 assignment
     : assign_target (ASSIGN assign_target)* ASSIGN expr
@@ -97,7 +94,7 @@ compound_stmt
     | decorated                        # DecoratedStmt
     ;
 
-// ---------------- IF ----------------
+
 
 if_stmt
     : IF expr COLON suite
@@ -105,19 +102,19 @@ if_stmt
       (ELSE COLON suite)?
     ;
 
-// ---------------- WHILE ----------------
+
 
 while_stmt
     : WHILE expr COLON suite
     ;
 
-// ---------------- FOR ----------------
+
 
 for_stmt
     : FOR IDENTIFIER IN expr COLON suite
     ;
 
-// ---------------- FUNCTION DEF ----------------
+
 
 func_def
     : DEF IDENTIFIER LPAREN parameters? RPAREN COLON suite
@@ -127,13 +124,13 @@ parameters
     : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
-// ---------------- CLASS DEF ----------------
+
 
 class_def
     : CLASS IDENTIFIER (LPAREN IDENTIFIER RPAREN)? COLON suite
     ;
 
-// ---------------- DECORATORS ----------------
+
 
 decorator
     : AT primary NEWLINE
@@ -143,7 +140,7 @@ decorated
     : decorator+ (func_def | class_def)
     ;
 
-// ---------------- SUITE ----------------
+
 
 suite
     : simple_stmt NEWLINE                       # InlineSuite
@@ -151,20 +148,65 @@ suite
     ;
 
 // ======================================================
-// EXPRESSIONS
+// EXPRESSIONS (layered precedence)
 // ======================================================
 
+// expr = entry point
 expr
-    : expr OR expr                                 # OrExpr
-    | expr AND expr                                # AndExpr
-    | expr (LT | GT | LE | GE | EQ | NE) expr      # CompareExpr
-    | expr IS (NOT)? expr                          # IsExpr
-    | expr (PLUS | MINUS) expr                     # AddSubExpr
-    | expr (STAR | DIV | INT_DIV) expr             # MulDivExpr
-    | NOT expr                                     # NotExpr
-    | (PLUS | MINUS) expr                          # UnaryPMExpr
-    | primary                                      # PrimaryExpr
-    | LAMBDA lambda_params? COLON expr             # LambdaExpr
+    : lambda_expr                               # ExprRoot
+    ;
+
+// lambda has the lowest precedence in this simplified model
+lambda_expr
+    : LAMBDA lambda_params? COLON expr          # LambdaExpr
+    | or_expr                                   # ToOrExpr
+    ;
+
+// OR
+or_expr
+    : and_expr (OR and_expr)*                   # OrExpr
+    ;
+
+// AND
+and_expr
+    : not_expr (AND not_expr)*                  # AndExpr
+    ;
+
+// NOT (unary logical)
+not_expr
+    : NOT not_expr                              # NotExpr
+    | comparison                                # ToCompareExpr
+    ;
+
+// comparisons (including IS / IS NOT)
+comparison
+    : arith_expr (comp_tail)*                   # CompareExpr
+    ;
+
+comp_tail
+    : (LT | GT | LE | GE | EQ | NE) arith_expr   # RelOp
+    | IS (NOT)? arith_expr                       # IsOp
+    ;
+
+// +, -
+arith_expr
+    : term ((PLUS | MINUS) term)*               # AddSubExpr
+    ;
+
+// *, /, //
+term
+    : power ((STAR | DIV | INT_DIV) power)*     # MulDivExpr
+    ;
+
+// ** (right associative)
+power
+    : unary (POW power)?                         # PowExpr
+    ;
+
+// unary +/-
+unary
+    : (PLUS | MINUS) unary                       # UnaryPMExpr
+    | primary                                    # PrimaryExpr
     ;
 
 lambda_params
@@ -176,13 +218,13 @@ lambda_params
 // ======================================================
 
 primary
-    : atom trailer*                         # PrimaryRoot
+    : atom trailer*                              # PrimaryRoot
     ;
 
 trailer
-    : LPAREN arguments? RPAREN              # CallTrailer
-    | DOT IDENTIFIER                        # AttrTrailer
-    | LBRACK expr RBRACK                    # IndexTrailer
+    : LPAREN arguments? RPAREN                   # CallTrailer
+    | DOT IDENTIFIER                             # AttrTrailer
+    | LBRACK expr RBRACK                         # IndexTrailer
     ;
 
 arguments
@@ -194,22 +236,22 @@ arguments
 // ======================================================
 
 atom
-    : literal                               # LiteralAtom
-    | IDENTIFIER                            # IdAtom
-    | LPAREN expr RPAREN                    # ParenExpr
+    : literal                                    # LiteralAtom
+    | IDENTIFIER                                 # IdAtom
+    | LPAREN expr RPAREN                         # ParenExpr
     ;
 
 // ======================================================
-// LITERALS (SET ONLY)
+// LITERALS (SET + LIST)
 // ======================================================
 
 literal
-    : number_literal                        # NumberLiteral
-    | string_literal                        # StringLiteral
-    | boolean_literal                       # BooleanLiteral
-    | NONE                                  # NoneLiteral
-    | set_literal                           # SetLiteral
-    | list_literal                          # listLiteral
+    : number_literal                             # NumberLiteral
+    | string_literal                             # StringLiteral
+    | boolean_literal                            # BooleanLiteral
+    | NONE                                       # NoneLiteral
+    | set_literal                                # SetLiteral
+    | list_literal                               # listLiteral
     ;
 
 set_literal
@@ -221,20 +263,20 @@ list_literal
     ;
 
 number_literal
-    : INT                                   # IntNumber
-    | FLOAT                                 # FloatNumber
-    | SCIENTIFIC                            # SciNumber
+    : INT                                        # IntNumber
+    | FLOAT                                      # FloatNumber
+    | SCIENTIFIC                                 # SciNumber
     ;
 
 string_literal
-    : TRIPLE_STRING                         # TripleString
-    | SINGLE_STRING                         # SingleString
-    | DOUBLE_STRING                         # DoubleString
+    : TRIPLE_STRING                              # TripleString
+    | SINGLE_STRING                              # SingleString
+    | DOUBLE_STRING                              # DoubleString
     ;
 
 boolean_literal
-    : TRUE                                  # TrueLiteral
-    | FALSE                                 # FalseLiteral
+    : TRUE                                       # TrueLiteral
+    | FALSE                                      # FalseLiteral
     ;
 
 // ======================================================

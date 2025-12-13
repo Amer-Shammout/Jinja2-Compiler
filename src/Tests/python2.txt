@@ -1,5 +1,5 @@
 def compute_area(width, height, factor):
-    area = (width + height) * factor // 2 - 5 * 2
+    area = (width + height) * factor // 2 - 5 ** 2
     if area >= 100:
         #print("Area is large:", area)
     else:
