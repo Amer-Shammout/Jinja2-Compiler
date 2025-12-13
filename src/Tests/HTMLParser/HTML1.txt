@@ -1,0 +1,4 @@
+Hello world
+This is plain HTML text only.
+No tags here.
+Just words and sentences.
