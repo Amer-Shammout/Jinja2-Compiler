@@ -74,36 +74,49 @@ attribute
 
 // ======================================================
 // CSS LEVEL 1 (BASIC STRUCTURE)
+// CSS LEVEL 2 (Selector Composition & Combinators)
 // ======================================================
 
 
+// <style> ... </style>
 style_element
     : style_open css_stylesheet CSS_STYLE_END         # StyleElement
     ;
 
-
+// <style ...>
 style_open
     : HTML_OPEN_TAG t=HTML_TAG_NAME attribute* HTML_CLOSE_TAG
       { $t.getText().equalsIgnoreCase("style") }?     # StyleOpenTag
     ;
 
-
+// ---------------- CSS STRUCTURE ----------------
 
 css_stylesheet
     : css_rule*                                      # CssStylesheet
     ;
 
-
+// selector { declarations }
 css_rule
     : css_selector css_block                         # CssRule
     ;
 
+// ======================================================
+// CSS SELECTORS (LEVEL 2)
+// ======================================================
 
 css_selector
-    : css_selector_item+                             # CssSelector
+    : css_selector_sequence
+      (CSS_COMMA css_selector_sequence)*             # CssSelector
     ;
 
-css_selector_item
+// sequence with combinators
+css_selector_sequence
+    : css_simple_selector
+      (css_combinator css_simple_selector)*          # SelectorSequence
+    ;
+
+// simple selector (same as level 1)
+css_simple_selector
     : CSS_UNIVERSAL                                  # UniversalSelector
     | CSS_IDENT                                      # TagSelector
     | CSS_HASH CSS_IDENT                             # IdSelector
@@ -111,18 +124,29 @@ css_selector_item
     | CSS_COLON CSS_IDENT                            # PseudoSelector
     ;
 
+// combinators
+css_combinator
+    : CSS_GT                                         # ChildCombinator
+    | CSS_PLUS                                       # AdjacentSibling
+    | CSS_TILDE                                      # GeneralSibling
+    |                                               # DescendantCombinator
+    ;
+
+// ======================================================
+// CSS BLOCK
+// ======================================================
 
 css_block
     : CSS_LBRACE css_declaration* CSS_RBRACE         # CssBlock
     ;
 
-
+// property: value;
 css_declaration
     : CSS_PROPERTY CSS_COLON_IN_BLOCK css_value CSS_SEMICOLON?
                                                      # CssDeclaration
     ;
 
-
+// value بسيط
 css_value
     : CSS_VALUE                                      # CssValue
     ;
