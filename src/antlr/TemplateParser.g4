@@ -1,3 +1,7 @@
+
+
+
+
 parser grammar TemplateParser;
 
 @header { package antlr; }
@@ -7,65 +11,118 @@ options {
 }
 
 // ======================================================
+// ROOT
+// ======================================================
+
+template
+    : doctype? document EOF                          # TemplateRoot
+    ;
+
+// <!DOCTYPE html>
+doctype
+    : DOCTYPE                                        # DoctypeDecl
+    ;
+
+// ======================================================
 // LEVEL 1: HTML TEXT ONLYS
 // LEVEL 2: HTML TAGS (NO ATTRIBUTES)
 // HTML LEVEL 3: ATTRIBUTES + SELF-CLOSING
 // ======================================================
 
-// ---------------- ROOT ----------------
-
-// ---------------- ROOT ----------------
-
-template
-    : doctype? document EOF
-    ;
-
-// <!DOCTYPE html>
-doctype
-    : DOCTYPE
-    ;
-
-// ---------------- DOCUMENT ----------------
-
 document
-    : html_element+
+    : html_element+                                  # HtmlDocument
     ;
 
-// ---------------- ELEMENT ----------------
 
 html_element
-    : normal_element
-    | self_closing_element
+    : style_element                                  # StyleHtmlElement
+    | normal_element                                 # NormalHtmlElement
+    | self_closing_element                           # SelfClosingHtmlElement
     ;
 
-// <tag ...> content </tag>
+
 normal_element
-    : open_tag html_content close_tag
+    : open_tag html_content close_tag                # NormalElement
     ;
 
-// <tag ... />
+
 self_closing_element
     : HTML_OPEN_TAG HTML_TAG_NAME attribute* HTML_SLASH_CLOSE
+                                                     # SelfClosingElement
     ;
 
-// ---------------- CONTENT ----------------
 
 html_content
-    : (html_element | HTML_TEXT)*
+    : (html_element | HTML_TEXT)*                    # HtmlContent
     ;
 
-// ---------------- TAGS ----------------
 
 open_tag
     : HTML_OPEN_TAG HTML_TAG_NAME attribute* HTML_CLOSE_TAG
+                                                     # OpenTag
     ;
 
 close_tag
     : HTML_OPEN_TAG HTML_SLASH HTML_TAG_NAME HTML_CLOSE_TAG
+                                                     # CloseTag
     ;
 
-// ---------------- ATTRIBUTES ----------------
 
 attribute
-    : HTML_ATTR_NAME HTML_EQUALS HTML_STRING
+    : HTML_ATTR_NAME HTML_EQUALS HTML_STRING          # HtmlAttribute
+    ;
+
+// ======================================================
+// CSS LEVEL 1 (BASIC STRUCTURE)
+// ======================================================
+
+
+style_element
+    : style_open css_stylesheet CSS_STYLE_END         # StyleElement
+    ;
+
+
+style_open
+    : HTML_OPEN_TAG t=HTML_TAG_NAME attribute* HTML_CLOSE_TAG
+      { $t.getText().equalsIgnoreCase("style") }?     # StyleOpenTag
+    ;
+
+
+
+css_stylesheet
+    : css_rule*                                      # CssStylesheet
+    ;
+
+
+css_rule
+    : css_selector css_block                         # CssRule
+    ;
+
+
+css_selector
+    : css_selector_item+                             # CssSelector
+    ;
+
+css_selector_item
+    : CSS_UNIVERSAL                                  # UniversalSelector
+    | CSS_IDENT                                      # TagSelector
+    | CSS_HASH CSS_IDENT                             # IdSelector
+    | CSS_DOT CSS_IDENT                              # ClassSelector
+    | CSS_COLON CSS_IDENT                            # PseudoSelector
+    ;
+
+
+css_block
+    : CSS_LBRACE css_declaration* CSS_RBRACE         # CssBlock
+    ;
+
+
+css_declaration
+    : CSS_PROPERTY CSS_COLON_IN_BLOCK css_value CSS_SEMICOLON?
+                                                     # CssDeclaration
+    ;
+
+
+css_value
+    : CSS_VALUE                                      # CssValue
     ;
