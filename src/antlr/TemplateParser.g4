@@ -19,9 +19,7 @@ doctype
     ;
 
 // ======================================================
-// LEVEL 1: HTML TEXT ONLYS
-// LEVEL 2: HTML TAGS (NO ATTRIBUTES)
-// HTML LEVEL 3: ATTRIBUTES + SELF-CLOSING
+// HTML
 // ======================================================
 
 document
@@ -44,7 +42,7 @@ self_closing_element
     ;
 
 html_content
-    : (jinja_expression | html_element | HTML_TEXT)*  # HtmlContent
+    : (jinja_expression | jinja_statement | html_element | HTML_TEXT)*  # HtmlContent
     ;
 
 open_tag
@@ -66,9 +64,7 @@ attribute_value
     ;
 
 // ======================================================
-// CSS LEVEL 1 (BASIC STRUCTURE)
-// CSS LEVEL 2 (Selector Composition & Combinators)
-// CSS LEVEL 3 (Multiple Values & Keywords)
+// CSS
 // ======================================================
 
 style_element
@@ -147,18 +143,11 @@ css_value_separator
     : CSS_COMMA_IN_BLCOK                             # CommaInBlock
     ;
 
-// ======================================================
-// CSS VALUE ATOMS (Jinja enabled here)
-// ======================================================
-
 css_value_atom
     : jinja_expression                               # CssJinjaValue
     | CSS_VALUE                                      # CssPrimitiveValue
     | css_function_call                              # CssFunctionValue
     ;
-
-
-
 
 css_function_call
     : CSS_FUNCTION css_function_args? CSS_RPAREN     # CssFunctionCall
@@ -169,10 +158,9 @@ css_function_args
     ;
 
 // ======================================================
-// LEVEL 3: JINJA2 EXPRESSIONS
+// JINJA EXPRESSIONS  {{ ... }}   (Expression mode tokens)
 // ======================================================
 
-// Accept Jinja start token from any lexer mode
 jinja_expr_start
     : JINJA_EXPR_START
     | JINJA_EXPR_START_IN_TAG
@@ -217,4 +205,83 @@ jinja_atom
     | JINJA_EXPR_STRING                               # JinjaStringAtom
     | JINJA_NUMBER                                    # JinjaNumberAtom
     | JINJA_EXPR_LPAREN jinja_expr JINJA_EXPR_RPAREN   # JinjaParenAtom
+    ;
+
+// ======================================================
+// JINJA STATEMENTS  {% ... %}   (Statement mode tokens)
+// ======================================================
+
+jinja_statement
+    : jinja_if_block                                  # JinjaIfStatement
+    ;
+
+// ---- IF BLOCK ----
+
+jinja_if_block
+    : jinja_if_clause
+      jinja_elif_clause*
+      jinja_else_clause?
+      jinja_endif_clause                              # JinjaIfBlock
+    ;
+
+jinja_if_clause
+    : JINJA_STMT_START JINJA_IF_STMT jinja_stmt_expr JINJA_STMT_END
+      html_content                                    # JinjaIf
+    ;
+
+jinja_elif_clause
+    : JINJA_STMT_START JINJA_ELIF_STMT jinja_stmt_expr JINJA_STMT_END
+      html_content                                    # JinjaElif
+    ;
+
+jinja_else_clause
+    : JINJA_STMT_START JINJA_ELSE_STMT JINJA_STMT_END
+      html_content                                    # JinjaElse
+    ;
+
+jinja_endif_clause
+    : JINJA_STMT_START JINJA_ENDIF JINJA_STMT_END     # JinjaEndIf
+    ;
+
+// ---- STATEMENT EXPRESSIONS (for if/elif conditions) ----
+
+jinja_stmt_expr
+    : jinja_stmt_term (jinja_stmt_op jinja_stmt_term)*   # JinjaStmtBinaryExpr
+    ;
+
+jinja_stmt_op
+    : JINJA_STMT_OP
+    | JINJA_AND
+    | JINJA_OR
+    ;
+
+jinja_stmt_term
+    : JINJA_NOT? jinja_stmt_atom jinja_stmt_postfix*     # JinjaStmtTerm
+    ;
+
+jinja_stmt_postfix
+    : JINJA_STMT_DOT JINJA_STMT_ID                        # JinjaStmtMemberAccess
+    | jinja_stmt_call                                     # JinjaStmtCallPostfix
+    | jinja_stmt_filter                                   # JinjaStmtFilterPostfix
+    ;
+
+jinja_stmt_call
+    : JINJA_STMT_LPAREN jinja_stmt_arg_list? JINJA_STMT_RPAREN
+                                                          # JinjaStmtCall
+    ;
+
+jinja_stmt_filter
+    : JINJA_STMT_PIPE JINJA_STMT_ID
+      (JINJA_STMT_LPAREN jinja_stmt_arg_list? JINJA_STMT_RPAREN)? # JinjaStmtFilter
+    ;
+
+jinja_stmt_arg_list
+    : jinja_stmt_expr (JINJA_STMT_COMMA jinja_stmt_expr)*  # JinjaStmtArgList
+    ;
+
+jinja_stmt_atom
+    : JINJA_STMT_ID                                         # JinjaStmtIdAtom
+    | JINJA_STMT_STRING                                     # JinjaStmtStringAtom
+    | JINJA_STMT_NUMBER                                     # JinjaStmtNumberAtom
+    | JINJA_STMT_LPAREN jinja_stmt_expr JINJA_STMT_RPAREN    # JinjaStmtParenAtom
     ;
