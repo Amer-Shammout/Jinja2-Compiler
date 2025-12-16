@@ -1,7 +1,3 @@
-
-
-
-
 parser grammar TemplateParser;
 
 @header { package antlr; }
@@ -18,7 +14,7 @@ template
     : doctype? document EOF                          # TemplateRoot
     ;
 
-// <!DOCTYPE html>
+
 doctype
     : DOCTYPE                                        # DoctypeDecl
     ;
@@ -53,7 +49,7 @@ self_closing_element
 
 
 html_content
-    : (html_element | HTML_TEXT)*                    # HtmlContent
+    : (jinja_expression | html_element | HTML_TEXT  )*  # HtmlContent
     ;
 
 
@@ -69,7 +65,11 @@ close_tag
 
 
 attribute
-    : HTML_ATTR_NAME HTML_EQUALS HTML_STRING          # HtmlAttribute
+    : HTML_ATTR_NAME HTML_EQUALS attribute_value      # HtmlAttribute
+    ;
+
+attribute_value
+    : HTML_STRING                                    # HtmlStringValue
     ;
 
 // ======================================================
@@ -88,9 +88,6 @@ style_open
     ;
 
 
-// ======================================================
-// CSS STYLESHEET
-// ======================================================
 
 css_stylesheet
     : css_rule*                                      # CssStylesheet
@@ -101,9 +98,6 @@ css_rule
     ;
 
 
-// ======================================================
-// CSS SELECTORS
-// ======================================================
 
 css_selector
     : css_selector_sequence
@@ -133,9 +127,6 @@ css_sub_selector
     ;
 
 
-// ======================================================
-// CSS COMBINATORS
-// ======================================================
 
 explicit_combinator
     : CSS_GT                                        # ChildCombinator
@@ -144,18 +135,12 @@ explicit_combinator
     ;
 
 
-// ======================================================
-// CSS BLOCK
-// ======================================================
 
 css_block
     : CSS_LBRACE css_declaration* CSS_RBRACE         # CssBlock
     ;
 
 
-// ======================================================
-// CSS DECLARATIONS
-// ======================================================
 
 css_declaration
     : CSS_PROPERTY CSS_COLON_IN_BLOCK
@@ -164,9 +149,6 @@ css_declaration
     ;
 
 
-// ======================================================
-// CSS VALUES
-// ======================================================
 
 
 css_value_list
@@ -190,9 +172,6 @@ css_value_separator
     ;
 
 
-// ======================================================
-// CSS VALUE ATOMS
-// ======================================================
 
 css_value_atom
     : CSS_VALUE                                     # CssPrimitiveValue
@@ -200,9 +179,6 @@ css_value_atom
     ;
 
 
-// ======================================================
-// CSS FUNCTIONS
-// ======================================================
 
 css_function_call
     : CSS_FUNCTION css_function_args? CSS_RPAREN     # CssFunctionCall
@@ -210,4 +186,47 @@ css_function_call
 
 css_function_args
     : css_value_list                                 # CssFunctionArgs
+    ;
+
+// ======================================================
+// LEVEL 3: JINJA2 EXPRESSIONS
+// ======================================================
+
+jinja_expression
+    : JINJA_EXPR_START jinja_expr JINJA_EXPR_END      # JinjaExpression
+    ;
+
+jinja_expr
+    : jinja_term (JINJA_OP jinja_term)*               # JinjaBinaryExpr
+    ;
+
+jinja_term
+    : jinja_atom jinja_postfix*                       # JinjaTerm
+    ;
+
+jinja_postfix
+    : JINJA_EXPR_DOT JINJA_ID                         # JinjaMemberAccess
+    | jinja_call                                      # JinjaCallPostfix
+    | jinja_filter                                    # JinjaFilterPostfix
+    ;
+
+jinja_call
+    : JINJA_EXPR_LPAREN jinja_arg_list? JINJA_EXPR_RPAREN
+                                                     # JinjaCall
+    ;
+
+jinja_filter
+    : JINJA_EXPR_PIPE JINJA_ID
+      (JINJA_EXPR_LPAREN jinja_arg_list? JINJA_EXPR_RPAREN)? # JinjaFilter
+    ;
+
+jinja_arg_list
+    : jinja_expr (JINJA_EXPR_COMMA jinja_expr)*       # JinjaArgList
+    ;
+
+jinja_atom
+    : JINJA_ID                                        # JinjaIdAtom
+    | JINJA_EXPR_STRING                               # JinjaStringAtom
+    | JINJA_NUMBER                                    # JinjaNumberAtom
+    | JINJA_EXPR_LPAREN jinja_expr JINJA_EXPR_RPAREN   # JinjaParenAtom
     ;
