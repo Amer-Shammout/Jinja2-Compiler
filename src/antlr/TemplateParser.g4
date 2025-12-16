@@ -75,33 +75,34 @@ attribute
 // ======================================================
 // CSS LEVEL 1 (BASIC STRUCTURE)
 // CSS LEVEL 2 (Selector Composition & Combinators)
+// CSS LEVEL 3 (Multiple Values & Keywords)
 // ======================================================
 
-
-// <style> ... </style>
 style_element
     : style_open css_stylesheet CSS_STYLE_END         # StyleElement
     ;
 
-// <style ...>
 style_open
     : HTML_OPEN_TAG t=HTML_TAG_NAME attribute* HTML_CLOSE_TAG
       { $t.getText().equalsIgnoreCase("style") }?     # StyleOpenTag
     ;
 
-// ---------------- CSS STRUCTURE ----------------
+
+// ======================================================
+// CSS STYLESHEET
+// ======================================================
 
 css_stylesheet
     : css_rule*                                      # CssStylesheet
     ;
 
-// selector { declarations }
 css_rule
     : css_selector css_block                         # CssRule
     ;
 
+
 // ======================================================
-// CSS SELECTORS (LEVEL 2)
+// CSS SELECTORS
 // ======================================================
 
 css_selector
@@ -109,28 +110,39 @@ css_selector
       (CSS_COMMA css_selector_sequence)*             # CssSelector
     ;
 
-// sequence with combinators
+
 css_selector_sequence
-    : css_simple_selector
-      (css_combinator css_simple_selector)*          # SelectorSequence
+    : css_compound_selector
+      (explicit_combinator css_compound_selector)*   # SelectorSequence
     ;
 
-// simple selector (same as level 1)
-css_simple_selector
-    : CSS_UNIVERSAL                                  # UniversalSelector
-    | CSS_IDENT                                      # TagSelector
-    | CSS_HASH CSS_IDENT                             # IdSelector
-    | CSS_DOT CSS_IDENT                              # ClassSelector
-    | CSS_COLON CSS_IDENT                            # PseudoSelector
+
+css_compound_selector
+    : css_type_selector? css_sub_selector*           # CompoundSelector
     ;
 
-// combinators
-css_combinator
-    : CSS_GT                                         # ChildCombinator
-    | CSS_PLUS                                       # AdjacentSibling
-    | CSS_TILDE                                      # GeneralSibling
-    |                                               # DescendantCombinator
+css_type_selector
+    : CSS_UNIVERSAL                                  # UniversalTypeSelector
+    | CSS_IDENT                                      # TagTypeSelector
     ;
+
+css_sub_selector
+    : CSS_HASH CSS_IDENT                             # IdSubSelector
+    | CSS_DOT  CSS_IDENT                             # ClassSubSelector
+    | CSS_COLON CSS_IDENT                            # PseudoSubSelector
+    ;
+
+
+// ======================================================
+// CSS COMBINATORS
+// ======================================================
+
+explicit_combinator
+    : CSS_GT                                        # ChildCombinator
+    | CSS_PLUS                                      # AdjacentSiblingCombinator
+    | CSS_TILDE                                     # GeneralSiblingCombinator
+    ;
+
 
 // ======================================================
 // CSS BLOCK
@@ -140,13 +152,62 @@ css_block
     : CSS_LBRACE css_declaration* CSS_RBRACE         # CssBlock
     ;
 
-// property: value;
+
+// ======================================================
+// CSS DECLARATIONS
+// ======================================================
+
 css_declaration
-    : CSS_PROPERTY CSS_COLON_IN_BLOCK css_value CSS_SEMICOLON?
-                                                     # CssDeclaration
+    : CSS_PROPERTY CSS_COLON_IN_BLOCK
+      css_value_list
+      CSS_SEMICOLON?                                 # CssDeclaration
     ;
 
-// value بسيط
-css_value
-    : CSS_VALUE                                      # CssValue
+
+// ======================================================
+// CSS VALUES
+// ======================================================
+
+
+css_value_list
+    : css_space_value_list
+      (css_comma_value_list)*                        # CssValueList
+    ;
+
+
+css_space_value_list
+    : css_value_atom+                                # SpaceSeparatedValues
+    ;
+
+
+css_comma_value_list
+    : css_value_separator
+      css_space_value_list                           # CommaSeparatedValues
+    ;
+
+css_value_separator
+    :  CSS_COMMA_IN_BLCOK                            # CommaInBlock
+    ;
+
+
+// ======================================================
+// CSS VALUE ATOMS
+// ======================================================
+
+css_value_atom
+    : CSS_VALUE                                     # CssPrimitiveValue
+    | css_function_call                              # CssFunctionValue
+    ;
+
+
+// ======================================================
+// CSS FUNCTIONS
+// ======================================================
+
+css_function_call
+    : CSS_FUNCTION css_function_args? CSS_RPAREN     # CssFunctionCall
+    ;
+
+css_function_args
+    : css_value_list                                 # CssFunctionArgs
     ;
