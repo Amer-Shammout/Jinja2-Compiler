@@ -14,7 +14,6 @@ template
     : doctype? document EOF                          # TemplateRoot
     ;
 
-
 doctype
     : DOCTYPE                                        # DoctypeDecl
     ;
@@ -29,29 +28,24 @@ document
     : html_element+                                  # HtmlDocument
     ;
 
-
 html_element
     : style_element                                  # StyleHtmlElement
     | normal_element                                 # NormalHtmlElement
     | self_closing_element                           # SelfClosingHtmlElement
     ;
 
-
 normal_element
     : open_tag html_content close_tag                # NormalElement
     ;
-
 
 self_closing_element
     : HTML_OPEN_TAG HTML_TAG_NAME attribute* HTML_SLASH_CLOSE
                                                      # SelfClosingElement
     ;
 
-
 html_content
-    : (jinja_expression | html_element | HTML_TEXT  )*  # HtmlContent
+    : (jinja_expression | html_element | HTML_TEXT)*  # HtmlContent
     ;
-
 
 open_tag
     : HTML_OPEN_TAG HTML_TAG_NAME attribute* HTML_CLOSE_TAG
@@ -62,7 +56,6 @@ close_tag
     : HTML_OPEN_TAG HTML_SLASH HTML_TAG_NAME HTML_CLOSE_TAG
                                                      # CloseTag
     ;
-
 
 attribute
     : HTML_ATTR_NAME HTML_EQUALS attribute_value      # HtmlAttribute
@@ -87,8 +80,6 @@ style_open
       { $t.getText().equalsIgnoreCase("style") }?     # StyleOpenTag
     ;
 
-
-
 css_stylesheet
     : css_rule*                                      # CssStylesheet
     ;
@@ -97,19 +88,15 @@ css_rule
     : css_selector css_block                         # CssRule
     ;
 
-
-
 css_selector
     : css_selector_sequence
       (CSS_COMMA css_selector_sequence)*             # CssSelector
     ;
 
-
 css_selector_sequence
     : css_compound_selector
       (explicit_combinator css_compound_selector)*   # SelectorSequence
     ;
-
 
 css_compound_selector
     : css_type_selector? css_sub_selector*           # CompoundSelector
@@ -126,21 +113,15 @@ css_sub_selector
     | CSS_COLON CSS_IDENT                            # PseudoSubSelector
     ;
 
-
-
 explicit_combinator
     : CSS_GT                                        # ChildCombinator
     | CSS_PLUS                                      # AdjacentSiblingCombinator
     | CSS_TILDE                                     # GeneralSiblingCombinator
     ;
 
-
-
 css_block
     : CSS_LBRACE css_declaration* CSS_RBRACE         # CssBlock
     ;
-
-
 
 css_declaration
     : CSS_PROPERTY CSS_COLON_IN_BLOCK
@@ -148,19 +129,14 @@ css_declaration
       CSS_SEMICOLON?                                 # CssDeclaration
     ;
 
-
-
-
 css_value_list
     : css_space_value_list
       (css_comma_value_list)*                        # CssValueList
     ;
 
-
 css_space_value_list
     : css_value_atom+                                # SpaceSeparatedValues
     ;
-
 
 css_comma_value_list
     : css_value_separator
@@ -168,15 +144,19 @@ css_comma_value_list
     ;
 
 css_value_separator
-    :  CSS_COMMA_IN_BLCOK                            # CommaInBlock
+    : CSS_COMMA_IN_BLCOK                             # CommaInBlock
     ;
 
-
+// ======================================================
+// CSS VALUE ATOMS (Jinja enabled here)
+// ======================================================
 
 css_value_atom
-    : CSS_VALUE                                     # CssPrimitiveValue
+    : jinja_expression                               # CssJinjaValue
+    | CSS_VALUE                                      # CssPrimitiveValue
     | css_function_call                              # CssFunctionValue
     ;
+
 
 
 
@@ -192,8 +172,16 @@ css_function_args
 // LEVEL 3: JINJA2 EXPRESSIONS
 // ======================================================
 
+// Accept Jinja start token from any lexer mode
+jinja_expr_start
+    : JINJA_EXPR_START
+    | JINJA_EXPR_START_IN_TAG
+    | JINJA_EXPR_START_IN_CSS
+    | JINJA_EXPR_START_IN_CSS_BLOCK
+    ;
+
 jinja_expression
-    : JINJA_EXPR_START jinja_expr JINJA_EXPR_END      # JinjaExpression
+    : jinja_expr_start jinja_expr JINJA_EXPR_END      # JinjaExpression
     ;
 
 jinja_expr
