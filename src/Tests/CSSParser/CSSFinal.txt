@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* ===== BASIC TAG SELECTOR ===== */
+        body {
+            margin: 10px 20px;
+            padding: 5px 10px 15px 20px;
+        }
+
+        /* ===== CLASS SELECTOR ===== */
+        .box {
+            border: 1px solid #333;
+            background: red;
+        }
+
+        /* ===== ID SELECTOR ===== */
+        #main {
+            width: 100px;
+        }
+
+        /* ===== COMPOUND SELECTOR ===== */
+        .box.dark {
+            background: black;
+            color: white;
+        }
+
+        /* ===== PSEUDO CLASS ===== */
+        .box:hover {
+            background: gray;
+        }
+
+        /* ===== DESCENDANT SELECTOR ===== */
+        .container .box {
+            padding: 20px;
+        }
+
+        /* ===== CHILD COMBINATOR ===== */
+        .container > .box {
+            margin: 10px;
+        }
+
+        /* ===== ADJACENT SIBLING ===== */
+        h1 + p {
+            margin-top: 0;
+        }
+
+        /* ===== GENERAL SIBLING ===== */
+        h1 ~ p {
+            color: gray;
+        }
+
+        /* ===== MULTIPLE SELECTORS ===== */
+        h1, h2, h3 {
+            font-weight: bold;
+        }
+
+        /* ===== VALUES: SPACE SEPARATED ===== */
+        .spacing {
+            margin: 10px 20px;
+        }
+
+        /* ===== VALUES: COMMA SEPARATED ===== */
+        .fonts {
+            font-family: "Arial", sans-serif;
+        }
+
+        /* ===== FUNCTION CALL ===== */
+        .grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        /* ===== MIXED VALUES ===== */
+        .background {
+            background: red url("bg.png") no-repeat;
+        }
+    </style>
+</head>
+
+<body id="main">
+    <div class="container">
+        <h1>Title</h1>
+        <p>First paragraph</p>
+        <p>Second paragraph</p>
+
+        <div class="box">Normal Box</div>
+        <div class="box dark">Dark Box</div>
+
+        <div class="box spacing">Spacing Box</div>
+        <div class="box fonts">Font Box</div>
+        <div class="box grid">Grid Box</div>
+        <div class="box background">Background Box</div>
+    </div>
+</body>
+</html>
