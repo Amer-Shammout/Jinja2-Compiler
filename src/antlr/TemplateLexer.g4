@@ -362,7 +362,8 @@ fragment CSS_NUMBER
 NUMBER_UNIT
     : 'px' |
     'vw' |
-    'fr';
+    'fr' |
+    '%'  ;
 
 CSS_VALUE
     : CSS_STRING

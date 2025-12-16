@@ -2,6 +2,10 @@
 <html>
 <head>
     <style>
+
+        * {
+        }
+
         /* ===== BASIC TAG SELECTOR ===== */
         body {
             margin: 10px 20px;
