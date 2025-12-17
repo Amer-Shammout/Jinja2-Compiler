@@ -8,14 +8,15 @@ lexer grammar TemplateLexer;
 
     java.util.LinkedList<Token> pendingTokens = new java.util.LinkedList<>();
 
-        @Override
-        public Token nextToken() {
-            if (!pendingTokens.isEmpty()) {
-                return pendingTokens.poll();
-            }
-            Token next = super.nextToken();
-            return next;
-        }
+           @Override
+                public Token nextToken() {
+                    if (!pendingTokens.isEmpty()) {
+                        return pendingTokens.poll();
+                    }
+                    Token next = super.nextToken();
+                    return next;
+                }
+
 
         Token commonToken(int type, String text) {
             return _factory.create(
@@ -28,6 +29,9 @@ lexer grammar TemplateLexer;
                 getCharPositionInLine()
             );
         }
+
+
+
 }
 
 
@@ -328,9 +332,9 @@ CSS_PROPERTY
      }
     ;
 
-// :
+
 CSS_COLON_IN_BLOCK : ':' ;
-CSS_COMMA_IN_BLCOK : ',' ;
+CSS_COMMA_IN_BLOCK : ',' ;
 
 
 // ;
