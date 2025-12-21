@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+  <title>{{ page_title|default("My App") }}</title>
+
+    {# Global styles #}
+    <style>
+        body {
+            font-family: Arial;
+            background-color: {{ bg_color }};
+            color: {{ text_color }};
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+    </style>
+</head>
+
+<body>
+
+{# Header block #}
+{% block header %}
+<header>
+    <h1>{{ page_title }}</h1>
+
+    {% if user %}
+        <p>Welcome {{ user.name }}</p>
+    {% else %}
+        <p>Please login</p>
+    {% endif %}
+</header>
+{% endblock %}
+
+<main class="container">
+
+    {% block content %}
+    <div class="grid">
+
+        {% for item in items %}
+        <div class="card">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+
+            {% if item.price %}
+                <p>Price: {{ item.price }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+    </div>
+    {% endblock %}
+
+    {% include "partials/footer.html" %}
+
+</main>
+
+</body>
+</html>

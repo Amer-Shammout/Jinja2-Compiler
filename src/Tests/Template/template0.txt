@@ -60,7 +60,7 @@
         /* Header with Jinja variable */
         .header h1 {
             color: {{ header_color }};
-            font-size: {{ header_size }}px;
+            font-size: {{ header_size }};
             text-align: center;
             margin-bottom: 30px;
         }
@@ -95,33 +95,34 @@
     </style>
 </head>
 <body>
-    {% if show_header %}
+       {% if show_header %}
     <header class="header">
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                {% for item in menu_items %}
-                <li><a href={{ item.url }}>{{ item.title }}</a></li>
-                {% endfor %}
+ <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    {% for item in menu_items %}
+                    <li><a>{{ item.title }}</a></li>
+                    {% endfor %}
 
-                {% if current_user %}
-                <li class="user-info">Welcome, {{ current_user.name }}</li>
-                <li><a href="/logout">Logout</a></li>
-                {% else %}
-                <li><a href="/login">Login</a></li>
-                {% endif %}
-            </ul>
-        </nav>
+                    {% if current_user %}
+                    <li class="user-info">Welcome, {{ current_user.name }}</li>
+                    <li><a href="/logout">Logout</a></li>
+                    {% else %}
+                    <li><a href="/login">Login</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
 
-        <h1>{{ page_title }}</h1>
+            <h1>{{ page_title }}</h1>
 
-        {% for message in get_flashed_messages() %}
-        <div class={{ 'alert-' ~ message.category }}>
-            {{ message.text }}
-        </div>
-        {% endfor %}
+            {% for message in get_flashed_messages() %}
+            <div >
+                {{ message.text }}
+            </div>
+            {% endfor %}
     </header>
     {% endif %}
+
 
     <main class="container">
         {% block content %}
@@ -143,13 +144,11 @@
                 </div>
                 {% endif %}
 
-                <button class={{ 'btn-' ~ (item.button_color | default('primary')) }}>
+                <button>
                     {{ item.button_text | default('View Details') }}
                 </button>
 
             </div>
-            {% else %}
-            <p>No items found.</p>
             {% endfor %}
         </div>
         {% endblock %}

@@ -1,13 +1,26 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-void main() {
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    IO.println(String.format("Hello and welcome!"));
+import AST.ASTGraphvizPrinter;
+import AST.ASTPrinter;
+import AST.Program;
+import AST.visitor.ProgramVisitor;
+import antlr.FlaskLexer;
+import antlr.FlaskParser;
+import org.antlr.v4.runtime.*;
 
-    for (int i = 1; i <= 5; i++) {
-        //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-        // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        IO.println("i = " + i);
+public class Main {
+    public static void main(String[] args) throws Exception {
+
+        CharStream input = CharStreams.fromFileName(
+                "C:/Users/ASUS/Desktop/CompilerProject/src/Tests/python2.txt"
+        );
+
+        FlaskLexer lexer = new FlaskLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        FlaskParser parser = new FlaskParser(tokens);
+
+        ProgramVisitor visitor = new ProgramVisitor();
+        Program program = visitor.visit(parser.prog());
+
+        ASTGraphvizPrinter.print(program, "ast.dot");
+
     }
 }

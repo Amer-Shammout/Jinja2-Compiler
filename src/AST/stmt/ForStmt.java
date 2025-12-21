@@ -1,0 +1,37 @@
+package AST.stmt;
+
+import AST.ASTNode;
+import AST.expr.Expression;
+import AST.expr.IdentifierExpr;
+import AST.suite.Suite;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ForStmt extends Statement {
+
+    private IdentifierExpr iterator;
+    private Expression iterable;
+    private Suite body;
+
+    public ForStmt(IdentifierExpr iterator, Expression iterable, Suite body, int lineNumber) {
+        super("ForStmt", lineNumber);
+        this.iterator = iterator;
+        this.iterable = iterable;
+        this.body = body;
+    }
+
+    @Override
+    public List<ASTNode> getChildren() {
+        return List.of(iterator, iterable, body);
+    }
+
+    @Override
+    public String toString() {
+        return "ForStmt{" +
+                "iterator=" + iterator +
+                ", iterable=" + iterable +
+                ", body=" + body +
+                '}';
+    }
+}

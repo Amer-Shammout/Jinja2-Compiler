@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            color: {{ text_color }};
+            background-color: {{ bg_color }};
+            font-size: {{ font_size }};
+        }
+
+        .container {
+            width: {{ width }};
+            grid-template-columns: repeat({{ cols }}, 1fr);
+        }
+
+        .card {
+            border: 1px solid {{ border_color }};
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ page_title }}</h1>
+    <p>Hello World</p>
+</body>
+</html>
