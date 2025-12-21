@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Main Page</h1>
+
+{% include "partials/footer.html" %}
+
+</body>
+</html>
