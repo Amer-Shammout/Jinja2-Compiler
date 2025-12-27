@@ -17,6 +17,14 @@ public class FunctionDefStmt extends Statement {
         this.parameters = parameters;
         this.body = body;
     }
+    public String getName() {
+        return name;
+    }
+
+    public List<String> getParameters() {
+        return parameters;
+    }
+
 
     @Override
     public List<ASTNode> getChildren() {
