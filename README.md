@@ -139,17 +139,17 @@ This is extremely useful for:
 
 ---
 
-## 📦 Symbol Table (Planned)
+## 📦 Symbol Table (Not Finished Yet)
 
-A **Symbol Table** will be added to support:
+A **Symbol Table** was added to support:
 - Variable declarations
 - Function definitions
 - Scope handling
 - Semantic analysis
 
 It will be integrated after AST construction for both:
-- Flask code
-- Template code
+- Flask code (Under Tests)
+- Template code (Planned)
 
 ---
 
