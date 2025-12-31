@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="grid">
+    {% for product in products %}
+    <div class="card">
+        <h3>{{ product.name }}</h3>
+
+        <p>
+            {{ product.description | truncate(120) }}
+        </p>
+
+        <p class="price">
+            ${{ "%.2f"|format(product.price) }}
+        </p>
+
+        {% if product.in_stock %}
+        <span class="tag">In Stock</span>
+        {% else %}
+        <span class="tag">Out of Stock</span>
+        {% endif %}
+
+        {% if product.category %}
+        <p>
+            Category: <strong>{{ product.category }}</strong>
+        </p>
+        {% endif %}
+
+        <a href="/products/{{ product.id }}">
+            <button class="btn-primary">View Details</button>
+        </a>
+    </div>
+    {% else %}
+    <div class="card">
+        <p>No products available.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

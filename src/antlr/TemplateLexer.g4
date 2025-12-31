@@ -206,6 +206,7 @@ JINJA_ENDIF     : 'endif';
 JINJA_IN        : 'in';
 JINJA_BLOCK     : 'block';
 JINJA_ENDBLOCK  : 'endblock';
+JINJA_EXTENDS  : 'extends';
 
 // logical operators
 JINJA_AND       : 'and';
