@@ -2,41 +2,36 @@
 
 {% block content %}
 <div class="card">
-    <h2>Add New Product</h2>
+    <h2>{{ product.name }}</h2>
 
-    <form method="post" action="/products/add">
-        <label>Product Name</label>
-        <input type="text" name="name" required="true">
+    <p>{{ product.description }}</p>
 
-        <label>Description</label>
-        <textarea name="description" rows="4"></textarea>
+    <p class="price">
+        ${{ "%.2f"|format(product.price) }}
+    </p>
 
-        <label>Price</label>
-        <input type="number" step="0.01" name="price" required="true">
+    {% if product.category %}
+    <p>
+        Category: <strong>{{ product.category }}</strong>
+    </p>
+    {% endif %}
 
-        <label>Category</label>
-        <input type="text" name="category">
-
-        <label>
-            <input type="checkbox" name="in_stock" checked="true">
-            In Stock
-        </label>
-
-        <br><br>
-
-        <button class="btn-success" type="submit">
-            Add Product
-        </button>
-    </form>
-
-    {% if errors %}
-    <div class="alert-error">
-        <ul>
-            {% for error in errors %}
-            <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
+    {% if product.tags %}
+    <div class="tags">
+        {% for tag in product.tags %}
+        <span class="tag">{{ tag }}</span>
+        {% endfor %}
     </div>
     {% endif %}
+
+    {% if product.in_stock %}
+    <p class="alert-success">Available</p>
+    {% else %}
+    <p class="alert-warning">Currently Unavailable</p>
+    {% endif %}
+
+    <a href="/products">
+        <button class="btn-secondary">Back to Products</button>
+    </a>
 </div>
 {% endblock %}
