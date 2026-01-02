@@ -35,4 +35,10 @@ public class ClassDefStmt extends Statement {
     public List<ASTNode> getChildren() {
         return List.of(body);
     }
+
+    @Override
+    public String toString() {
+        return "ClassDefStmt(" + name + ") (line " + lineNumber + ")";
+    }
+
 }

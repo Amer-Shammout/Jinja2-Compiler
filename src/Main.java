@@ -1,37 +1,38 @@
 import AST.ASTGraphvizPrinter;
-import AST.Program;
-import AST.visitor.ProgramVisitor;
-import SymbolTable.FlaskSymbolTable;
-import antlr.FlaskLexer;
-import antlr.FlaskParser;
+import AST.ASTNode;
+import antlr.TemplateLexer;
+import antlr.TemplateParser;
 import org.antlr.v4.runtime.*;
 import java.nio.file.*;
-
 
 public class Main {
     public static void main(String[] args) throws Exception {
 
-
-        Path p = Paths.get("src/Tests/FinalTests/app.py").toAbsolutePath();
+        Path p = Paths.get("src/Tests/FinalTests/base.html").toAbsolutePath();
         CharStream input = CharStreams.fromPath(p);
 
+//        FlaskLexer lexer = new FlaskLexer(input);
+//        CommonTokenStream tokens = new CommonTokenStream(lexer);
+//        FlaskParser parser = new FlaskParser(tokens);
+//
+//        ProgramVisitor visitor = new ProgramVisitor();
+//        Program program = visitor.visit(parser.prog());
+//        ASTGraphvizPrinter.print(program, "ast.dot");
 
-        FlaskLexer lexer = new FlaskLexer(input);
+//        FlaskSymbolTable flaskSymbolTable = new FlaskSymbolTable();
+//        SymbolTable.SymbolTableVisitor stVisitor = new SymbolTable.SymbolTableVisitor();
+//        stVisitor.visitProgram(program);
+//        flaskSymbolTable = stVisitor.getSymbolTable();
+//        flaskSymbolTable.printSymbolTable();
+
+        TemplateLexer lexer = new TemplateLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        FlaskParser parser = new FlaskParser(tokens);
+        TemplateParser parser = new TemplateParser(tokens);
 
-        ProgramVisitor programVisitor = new ProgramVisitor();
-        Program program = programVisitor.visitProg(parser.prog());
+//        TemplateVisitor visitor = new TemplateVisitor();
+//        ASTNode root = visitor.visit(parser.template());
+//        ASTGraphvizPrinter.print(root, "ast.dot");
 
-        FlaskSymbolTable flaskSymbolTable = new FlaskSymbolTable();
-        SymbolTable.SymbolTableVisitor stVisitor = new SymbolTable.SymbolTableVisitor();
-        stVisitor.visitProgram(program);
-        flaskSymbolTable = stVisitor.getSymbolTable();
-        flaskSymbolTable.printSymbolTable();
-
-
-        ASTGraphvizPrinter.print(program, "ast.dot");
-
-        System.out.println("Symbol table and AST generated successfully!");
     }
 }
+

@@ -66,6 +66,7 @@ public class FlaskSymbolTable {
 
     public enum SymbolType { VARIABLE, FUNCTION, PARAMETER }
 
+
     public static class Symbol {
         private final String name;
         private final SymbolType type;

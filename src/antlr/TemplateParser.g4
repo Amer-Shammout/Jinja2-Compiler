@@ -1,9 +1,9 @@
 parser grammar TemplateParser;
 
-@header {
-    // Parser package
-    package antlr;
-}
+//@header {
+//    // Parser package
+//    package antlr;
+//}
 
 options {
     // Lexer tokens
@@ -58,15 +58,15 @@ normal_element
     : open_tag html_content close_tag              # NormalElement
     ;
 
-// <tag />
+// <tag /> // hay ana ghalia ghayyarta
 self_closing_element
-    : HTML_OPEN_TAG HTML_TAG_NAME attribute* HTML_SLASH_CLOSE
+    : HTML_OPEN_TAG (HTML_TAG_NAME | HTML_VOID_TAG) attribute* HTML_SLASH_CLOSE
                                                    # SelfClosingElement
     ;
 
-// <tag>
+// <tag> // hay ana ghalia ghayyarta
 void_element
-    : HTML_OPEN_TAG HTML_TAG_NAME attribute* HTML_CLOSE_TAG
+     : HTML_OPEN_TAG (HTML_TAG_NAME | HTML_VOID_TAG) attribute* HTML_CLOSE_TAG
                                                    # VoidElement
     ;
 
@@ -283,6 +283,7 @@ jinja_statement
     | jinja_for_block                              # JinjaForStatement
     | jinja_include_statement                      # JinjaIncludeStatement
     | jinja_block_statement                        # JinjaBlockStatement
+    | jinja_extends_statement                      # JinjaExtendsStatement
     ;
 
 // Stmt start
@@ -371,6 +372,11 @@ jinja_block_open
 jinja_block_close
     : jinja_stmt_start JINJA_ENDBLOCK JINJA_STMT_END
                                                    # JinjaBlockClose
+    ;
+
+jinja_extends_statement
+    : jinja_stmt_start JINJA_EXTENDS JINJA_STMT_STRING JINJA_STMT_END
+                                                   # JinjaExtends
     ;
 
 // Statement expr

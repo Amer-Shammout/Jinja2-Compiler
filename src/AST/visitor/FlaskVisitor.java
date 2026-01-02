@@ -7,7 +7,6 @@ import AST.literal.*;
 import AST.stmt.*;
 import AST.suite.*;
 
-
 import antlr.FlaskParser;
 import antlr.FlaskParserBaseVisitor;
 
@@ -92,10 +91,6 @@ public class FlaskVisitor extends FlaskParserBaseVisitor<ASTNode> {
 
 
 
-
-
-
-
     @Override
     public ASTNode visitAssignment(FlaskParser.AssignmentContext ctx) {
 
@@ -118,9 +113,6 @@ public class FlaskVisitor extends FlaskParserBaseVisitor<ASTNode> {
 
         return new AssignmentChainStmt(lhsList, rhs, ctx.start.getLine());
     }
-
-
-
 
 
     @Override
@@ -159,15 +151,6 @@ public class FlaskVisitor extends FlaskParserBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitImportModule(FlaskParser.ImportModuleContext ctx) {
-
-        List<String> modules =
-                ctx.dotted_name().stream().map(d -> d.getText()).toList();
-
-        return new ImportModuleStmt(modules, ctx.start.getLine());
-    }
-
-    @Override
     public ASTNode visitFromImport(FlaskParser.FromImportContext ctx) {
 
         String module = ctx.dotted_name().getText();
@@ -177,10 +160,6 @@ public class FlaskVisitor extends FlaskParserBaseVisitor<ASTNode> {
 
         return new FromImportStmt(module, names, ctx.start.getLine());
     }
-
-    /* =========================
-       IF / WHILE / FOR
-     ========================= */
 
     @Override
     public ASTNode visitIf_stmt(FlaskParser.If_stmtContext ctx) {
@@ -225,10 +204,6 @@ public class FlaskVisitor extends FlaskParserBaseVisitor<ASTNode> {
 
         return new ForStmt(iterator, iterable, body, ctx.start.getLine());
     }
-
-    /* =========================
-       FUNCTION / CLASS
-     ========================= */
 
     @Override
     public ASTNode visitFunc_def(FlaskParser.Func_defContext ctx) {
@@ -503,13 +478,6 @@ public class FlaskVisitor extends FlaskParserBaseVisitor<ASTNode> {
     public ASTNode visitIdAtom(FlaskParser.IdAtomContext ctx) {
         return new IdentifierExpr(ctx.IDENTIFIER().getText(), ctx.start.getLine());
     }
-
-
-    @Override
-    public ASTNode visitParenExpr(FlaskParser.ParenExprContext ctx) {
-        return visit(ctx.expr());
-    }
-
 
     @Override
     public ASTNode visitIntNumber(FlaskParser.IntNumberContext ctx) {

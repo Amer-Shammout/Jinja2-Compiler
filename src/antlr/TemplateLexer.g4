@@ -1,6 +1,6 @@
 lexer grammar TemplateLexer;
 
-@header { package antlr; }
+//@header { package antlr; }
 
 @members {
     boolean isTagName = false;
@@ -114,6 +114,19 @@ HTML_SLASH_CLOSE
 HTML_SLASH
     : '/'
     ;
+
+// hay ana ghalia hateta
+ HTML_VOID_TAG
+        : {isTagName}? (
+             'meta'
+           | 'br'
+           | 'hr'
+           | 'link'
+           | 'input'
+           | 'img'
+          ) { isTagName = false; }
+        ;
+
 
 // tag name
 HTML_TAG_NAME
