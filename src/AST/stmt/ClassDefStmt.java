@@ -19,6 +19,17 @@ public class ClassDefStmt extends Statement {
         this.parent = parent;
         this.body = body;
     }
+    public String getName() {
+        return name;
+    }
+
+    public String getParent() {
+        return parent;
+    }
+
+    public Suite getBody() {
+        return body;
+    }
 
     @Override
     public List<ASTNode> getChildren() {

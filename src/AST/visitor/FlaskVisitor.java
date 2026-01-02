@@ -7,8 +7,6 @@ import AST.literal.*;
 import AST.stmt.*;
 import AST.suite.*;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-
 
 import antlr.FlaskParser;
 import antlr.FlaskParserBaseVisitor;

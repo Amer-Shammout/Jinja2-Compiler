@@ -69,7 +69,7 @@ public class FlaskSymbolTable {
     public static class Symbol {
         private final String name;
         private final SymbolType type;
-        private final String dataType; // مثلا int, str, list
+        private final String dataType;
         private final int lineNumber;
 
         public Symbol(String name, SymbolType type, int lineNumber) {
@@ -133,7 +133,7 @@ public class FlaskSymbolTable {
         }
     }
 
-    // بحث في جميع scopes من الحالي للخارجي
+
     public Symbol lookup(String name) {
         for (Scope scope : scopeStack) {
             Symbol s = scope.lookup(name);
@@ -142,15 +142,21 @@ public class FlaskSymbolTable {
         return null;
     }
 
-    // طباعة جميع scopes والرموز
     public void printSymbolTable() {
         System.out.println("=== Symbol Table ===");
         for (Scope scope : scopeStack) {
             System.out.println("Scope: " + scope.getName());
             for (Symbol s : scope.getSymbols()) {
-                System.out.println("  " + s);
+
+                int line = s.lineNumber >= 0 ? s.lineNumber : 0;
+                System.out.printf("  %s : %s [line %d]%n",
+                        s.name,
+                        s.type,
+                        line);
             }
         }
         System.out.println("===================");
     }
+
+
 }
