@@ -148,7 +148,7 @@ A **Symbol Table** was added to support:
 - Semantic analysis
 
 It will be integrated after AST construction for both:
-- Flask code (Under Tests)
+- Flask code 
 - Template code (Planned)
 
 ---
